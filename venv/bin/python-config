@@ -1,4 +1,4 @@
-#!/home/batcaver/Escritorio/Juego/venv/bin/python
+#!/home/batcaver/Escritorio/game/venv/bin/python
 
 import sys
 import getopt
