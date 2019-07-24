@@ -31,8 +31,10 @@ class Player(QThread):
         # inicio timer
         timer.start(100)
 
+        # para conocer cambios en la pantalla y enemigos
         self.parent = parent
 
+        # alto y ancho
         self.width = 32
         self.height = 32
 
@@ -60,7 +62,9 @@ class Player(QThread):
         self.__position = (0, 0)
         self.position = (x, y)  # este es una property
 
+        # para saber la orientacion del personaje
         self.__direction = "right"
+        # para mover al personaje
         self.velocity = [0, 0]
 
     @property
@@ -72,6 +76,7 @@ class Player(QThread):
     def position(self, value):
         # lo que se hace cuando se modifica la property
         self.__position = value
+        # movemos la caja que detecta colisiones
         self.collideBox.move(value)
         # El moveImageTrigger emite su señal a la ventana principal cuando cambiamos la posición
         self.moveImageTrigger.emit(MoveImageEvent(
@@ -84,6 +89,7 @@ class Player(QThread):
 
     @direction.setter
     def direction(self, value):
+        # si el path tiene la palabra right o left la cambia por el value
         self.imagePath = self.imagePath.replace("right", value)
         self.imagePath = self.imagePath.replace("left", value)
 
@@ -92,6 +98,7 @@ class Player(QThread):
         number = int(self.imagePath[-1])
         # Quito la ultima letra del path
         self.imagePath = self.imagePath[:len(self.imagePath) - 1]
+        # como los numeros de las imagenes llegan a 3...
         if number < 3:
             number += 1
         else:
@@ -108,16 +115,22 @@ class Player(QThread):
         while True:
             # mueve la imagen constantemente cada 0.02
             time.sleep(0.02)
+            # cambia la posicion de acuerdo a la velocidad
             self.position = (
                 self.position[0]+self.velocity[0], self.position[1]+self.velocity[1])
+
+            # esto no va
             if self.parent.enemy.collideBox.intersect(self.collideBox):
                 print('chocando'+str(random.randint(1, 100)))
 
 
 class Controller:
+    # controla los botones presionados
     def __init__(self, parent):
+        # parent es Player
         self.parent = parent
 
+    # funcion para mover al jugador
     def move(self, movePlayerEvent):
         # setea velocidad 2 a la derecha y orientacion a la derecha
         if movePlayerEvent.direction == "right":
@@ -146,11 +159,13 @@ class Controller:
 
 
 class CollideBox:
+    # caja que detecta colisiones
     def __init__(self, parent, x, y):
         self.parent = parent
         self.position = (x, y)
         self.width = parent.width
         self.height = parent.height
 
+    # funcion para mover la caja
     def move(self, newpos):
         self.position = newpos

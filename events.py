@@ -13,5 +13,6 @@ class MoveImageEvent:
 
 
 class MovePlayerEvent:
+    # clase para emitir señal de mover la jugador
     def __init__(self, direction):
         self.direction = direction

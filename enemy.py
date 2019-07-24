@@ -26,8 +26,10 @@ class Skeleton(QThread):
         # Timer para la animacion del player
         self.animationTimer = QTimer()  # no esta hecha la animacion
 
+        # parect es la pantalla, para saber cambios en el juego
         self.parent = parent
 
+        # alto y ancho
         self.width = 32
         self.height = 32
 
@@ -45,6 +47,7 @@ class Skeleton(QThread):
         # Conectamos el trigger a la funcion de la ventana principal de actualizar imagen
         self.trigger.connect(parent.actualizar_imagen)
 
+        # caja que detecta colisiones
         self.collideBox = CollideBox(self, x, y)
 
         # se setea la posicion inicial
@@ -60,6 +63,7 @@ class Skeleton(QThread):
     def position(self, value):
         # lo que se hace cuando se modifica la property
         self.__position = value
+        # muevo la caja de colisiones
         self.collideBox.move(value)
         # El trigger emite su señal a la ventana principal cuando cambiamos la posición
         self.trigger.emit(MoveImageEvent(
@@ -70,6 +74,7 @@ class Skeleton(QThread):
         while True:
             # mueve la imagen constantemente cada 0.05
             time.sleep(0.05)
+
             # si llega al borde de abajo lo tira para arriba
             if self.position[1] <= 300:
                 self.position = (self.position[0], self.position[1])
@@ -78,15 +83,18 @@ class Skeleton(QThread):
 
 
 class CollideBox:
+    # caja que detecta colisiones
     def __init__(self, parent, x, y):
         self.parent = parent
         self.position = (x, y)
         self.width = parent.width
         self.height = parent.height
 
+    # funcion para mover la caja
     def move(self, newpos):
         self.position = newpos
 
+    # funcion que detecta colisiones
     def intersect(self, otherBox):
         if abs(otherBox.position[0]-self.position[0]) < self.width and abs(otherBox.position[1]-self.position[1]) < self.height:
             return True
