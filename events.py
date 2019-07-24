@@ -1,11 +1,5 @@
 class MoveImageEvent:
-    """
-    Las instancias de esta clase
-    contienen la informacion necesaria
-    para que la ventana actualice
-    la posicion de la imagen
-    """
-
+    # clase para emitir señal de mover imagenes
     def __init__(self, image, x, y):
         self.image = image
         self.x = x
@@ -19,6 +13,12 @@ class MovePlayerEvent:
 
 
 class ChocarEnemigoEvent:
-    # clase para emitir señal y comprobar si estoy chocando y que hacer
+    # clase para emitir señal y comprobar si estoy chocando
     def __init__(self, mono):
         self.mono = mono
+
+
+class getOrientationEvent:
+    # clase para orientar a los enemigos
+    def __init__(self, enemy):
+        self.enemy = enemy

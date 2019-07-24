@@ -4,50 +4,44 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel
 from PyQt5.QtGui import QPixmap
 import sys
 import time
+import numpy as np
 from enemy import Skeleton
 from player import Player
 from events import MovePlayerEvent
 
 
 class MainWindow(QMainWindow):
-    # ventana del juego principal
-    # trigger que emite señales para mover al jugador
     movePlayerTrigger = pyqtSignal(MovePlayerEvent)
 
     def __init__(self):
         super().__init__()
-        # esqueleto enemigo
         self.enemies = [Skeleton(self, 130, 40)]
-        # jugador
         self.player = Player(self, 180, 40)
 
-        # seteo el titulo y otras propiedades de la ventana
-        self.titulo = QLabel(self)
-        self.titulo.setText("Ejemplo")
-        self.titulo.move(160, 10)
-        self.titulo.show()
         self.setGeometry(500, 500, 400, 300)
         self.show()
 
-        # conecto el trigger de mover jugador al contorlador del jugador
+        # conecto el trigger de mover jugador al controlador del jugador
         self.movePlayerTrigger.connect(self.player.controller.move)
 
     @staticmethod
     def actualizar_imagen(myImageEvent):
-        # metodo estatico que actualiza una imagen
         label = myImageEvent.image
         label.move(myImageEvent.x, myImageEvent.y)
 
     def comprobar_choque(self, chocarEvent):
-        # para cada enemigo en la lista
         for enemy in self.enemies:
-            # veo si esta chocando
             if enemy.collideBox.intersect(chocarEvent.mono):
-                # si esta chocando produce daño en el mono
                 chocarEvent.mono.damage(enemy)
+                enemy.atacar(chocarEvent.mono)
+
+    def enemyOrientation(self, getOrientationEvent):
+        dx = self.player.position[0] - getOrientationEvent.enemy.position[0]
+        dy = self.player.position[1] - getOrientationEvent.enemy.position[1]
+        orientation = np.arctan2(dx, dy)
+        getOrientationEvent.enemy.orientation = orientation
 
     def keyPressEvent(self, event):
-        # cuando se apreta una tecla entro aca
         if event.key() == Qt.Key_Escape:
             self.close()
         if event.key() == Qt.Key_Right:
@@ -60,7 +54,6 @@ class MainWindow(QMainWindow):
             self.movePlayerTrigger.emit(MovePlayerEvent('down'))
 
     def keyReleaseEvent(self, event):
-        # cuando se suelta una tecla entro aca
         if event.key() == Qt.Key_Right:
             self.movePlayerTrigger.emit(MovePlayerEvent('stop_right'))
         if event.key() == Qt.Key_Up:
@@ -71,18 +64,13 @@ class MainWindow(QMainWindow):
             self.movePlayerTrigger.emit(MovePlayerEvent('stop_down'))
 
     def run(self):
-        # inicio el thread de los enemigos
         for enemy in self.enemies:
             enemy.start()
-        # inicio el thread del jugador
         self.player.start()
-        # mato todo
         sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
-    # creo la app
     app = QApplication([])
-    # inicio el thrad de la ventana de juego
     ex = MainWindow()
     ex.run()
