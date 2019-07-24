@@ -1,11 +1,13 @@
 # Hecho recientemente
 
 puedo mover el personaje
-el pesonaje sabe que choca con el enemigo pero no hace nada aun
+el pesonaje choca con el enemigo
 
 
 # Cosas faltantes
 
+poner server y manejar todo a traves del server
+poner muerte
 poner magia
 poner animacion de magia
 poner ia

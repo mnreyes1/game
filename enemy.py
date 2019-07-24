@@ -54,6 +54,12 @@ class Skeleton(QThread):
         self.__position = (0, 0)
         self.position = (x, y)  # este es una property
 
+        # cuanto daño hace
+        self.attack = 5
+
+        # direccion en la que se movera en radianes
+        self.orientation = 0
+
     @property
     def position(self):
         # property de posicion

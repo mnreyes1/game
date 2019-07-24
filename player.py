@@ -4,12 +4,14 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel
 from PyQt5.QtGui import QPixmap
 import sys
 import time
-from events import MoveImageEvent
+from events import MoveImageEvent, ChocarEnemigoEvent
 import random
 
 
 class Player(QThread):
+    # triggers para mover imagen y comprobar choque
     moveImageTrigger = pyqtSignal(MoveImageEvent)
+    chocarEnemigoTrigger = pyqtSignal(ChocarEnemigoEvent)
     # pyqtSignal recibe *args que le indican
     # cuales son los tipos de argumentos que seran enviados
     # en este caso, solo se enviara un argumento:
@@ -30,9 +32,6 @@ class Player(QThread):
         timer.timeout.connect(self.update_frame)
         # inicio timer
         timer.start(100)
-
-        # para conocer cambios en la pantalla y enemigos
-        self.parent = parent
 
         # alto y ancho
         self.width = 32
@@ -55,6 +54,7 @@ class Player(QThread):
 
         # Conectamos el moveImageTrigger a la funcion de la ventana principal de actualizar imagen
         self.moveImageTrigger.connect(parent.actualizar_imagen)
+        self.chocarEnemigoTrigger.connect(parent.comprobar_choque)
 
         self.collideBox = CollideBox(self, x, y)
 
@@ -66,6 +66,9 @@ class Player(QThread):
         self.__direction = "right"
         # para mover al personaje
         self.velocity = [0, 0]
+
+        # salud
+        self.__salud = 100
 
     @property
     def position(self):
@@ -93,6 +96,22 @@ class Player(QThread):
         self.imagePath = self.imagePath.replace("right", value)
         self.imagePath = self.imagePath.replace("left", value)
 
+    @property
+    def salud(self):
+        return self.__salud
+
+    @salud.setter
+    def salud(self, value):
+        if value < 0:
+            self.__salud = 0
+            self.die()
+        else:
+            self.__salud = value
+
+    def die(self):
+        # funcion para saber que pasa cuando muere el player
+        pass
+
     def update_frame(self):
         # obtengo el numero de la imagen
         number = int(self.imagePath[-1])
@@ -111,6 +130,17 @@ class Player(QThread):
         self.moveImageTrigger.emit(MoveImageEvent(
             self.image, self.position[0], self.position[1]))
 
+    def damage(self, enemy):
+        # funcion que hace daño al jugador
+        self.salud -= enemy.attack
+        print(self.salud)
+        # define cuanto empuja el enemigo hacia atras en el eje x
+        dx = enemy.position[0] - self.position[0]
+        # define cuanto empuja el enemigo hacia atras en el eje y
+        dy = enemy.position[1] - self.position[1]
+        # mueve al personaje hacia atras
+        self.position = (self.position[0] - dx, self.position[1] - dy)
+
     def run(self):
         while True:
             # mueve la imagen constantemente cada 0.02
@@ -119,9 +149,8 @@ class Player(QThread):
             self.position = (
                 self.position[0]+self.velocity[0], self.position[1]+self.velocity[1])
 
-            # esto no va
-            if self.parent.enemy.collideBox.intersect(self.collideBox):
-                print('chocando'+str(random.randint(1, 100)))
+            # emito señal para ver si choco enemigo
+            self.chocarEnemigoTrigger.emit(ChocarEnemigoEvent(self))
 
 
 class Controller:

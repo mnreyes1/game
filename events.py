@@ -16,3 +16,9 @@ class MovePlayerEvent:
     # clase para emitir señal de mover la jugador
     def __init__(self, direction):
         self.direction = direction
+
+
+class ChocarEnemigoEvent:
+    # clase para emitir señal y comprobar si estoy chocando y que hacer
+    def __init__(self, mono):
+        self.mono = mono

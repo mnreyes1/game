@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         # esqueleto enemigo
-        self.enemy = Skeleton(self, 130, 40)
+        self.enemies = [Skeleton(self, 130, 40)]
         # jugador
         self.player = Player(self, 180, 40)
 
@@ -37,6 +37,14 @@ class MainWindow(QMainWindow):
         # metodo estatico que actualiza una imagen
         label = myImageEvent.image
         label.move(myImageEvent.x, myImageEvent.y)
+
+    def comprobar_choque(self, chocarEvent):
+        # para cada enemigo en la lista
+        for enemy in self.enemies:
+            # veo si esta chocando
+            if enemy.collideBox.intersect(chocarEvent.mono):
+                # si esta chocando produce daño en el mono
+                chocarEvent.mono.damage(enemy)
 
     def keyPressEvent(self, event):
         # cuando se apreta una tecla entro aca
@@ -64,7 +72,8 @@ class MainWindow(QMainWindow):
 
     def run(self):
         # inicio el thread de los enemigos
-        self.enemy.start()
+        for enemy in self.enemies:
+            enemy.start()
         # inicio el thread del jugador
         self.player.start()
         # mato todo
