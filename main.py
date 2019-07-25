@@ -8,21 +8,41 @@ import numpy as np
 from enemy import Skeleton
 from player import Player
 from events import MovePlayerEvent
+from PyQt5 import uic
+
+ventanaInicio = uic.loadUiType("ventana_inicio.ui")
+ventanaJuego = uic.loadUiType("ventana_juego.ui")
 
 
-class MainWindow(QMainWindow):
-    movePlayerTrigger = pyqtSignal(MovePlayerEvent)
-
+class MainWindow(ventanaInicio[0], ventanaInicio[1]):
     def __init__(self):
         super().__init__()
-        self.enemies = [Skeleton(self, 130, 40)]
-        self.player = Player(self, 180, 40)
-
-        self.setGeometry(500, 500, 400, 300)
+        self.setupUi(self)
+        self.botonJugar.clicked.connect(self.jugar)
+        self.botonSalir.clicked.connect(self.salir)
+        self.ventanaJuego = GameWindow(self)
         self.show()
 
+    def jugar(self):
+        self.ventanaJuego.run()
+        self.close()
+
+    def salir(self):
+        self.close()
+
+
+class GameWindow(ventanaJuego[0], ventanaJuego[1]):
+    movePlayerTrigger = pyqtSignal(MovePlayerEvent)
+
+    def __init__(self, mainWindow):
+        super().__init__()
+        self.setupUi(self)
+        self.enemies = [Skeleton(self, 130, 40)]
+        self.player = Player(self, 240, 40)
+        self.barraSalud.setValue(100)
         # conecto el trigger de mover jugador al controlador del jugador
         self.movePlayerTrigger.connect(self.player.controller.move)
+        self.mainWindow = mainWindow
 
     @staticmethod
     def actualizar_imagen(myImageEvent):
@@ -34,6 +54,7 @@ class MainWindow(QMainWindow):
             if enemy.collideBox.intersect(chocarEvent.mono):
                 chocarEvent.mono.damage(enemy)
                 enemy.atacar(chocarEvent.mono)
+                self.barraSalud.setValue(chocarEvent.mono.salud)
 
     def enemyOrientation(self, getOrientationEvent):
         dx = self.player.position[0] - getOrientationEvent.enemy.position[0]
@@ -63,14 +84,22 @@ class MainWindow(QMainWindow):
         if event.key() == Qt.Key_Down:
             self.movePlayerTrigger.emit(MovePlayerEvent('stop_down'))
 
+    def gameOver(self):
+        for enemy in self.enemies:
+            enemy.terminate()
+        self.player.terminate()
+        self.mainWindow.show()
+        self.close()
+
     def run(self):
+        self.barraSalud.setValue(100)
+        self.show()
         for enemy in self.enemies:
             enemy.start()
         self.player.start()
-        sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
     app = QApplication([])
-    ex = MainWindow()
-    ex.run()
+    main = MainWindow()
+    sys.exit(app.exec_())

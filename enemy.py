@@ -34,7 +34,7 @@ class Skeleton(QThread):
         self.collideBox = CollideBox(self, x, y)
         self.__position = (0, 0)
         self.position = (x, y)  # este es una property
-        self.attack = 5
+        self.attack = 55
         self.orientation = 0
         self.speed = 0.5
 

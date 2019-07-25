@@ -11,6 +11,7 @@ import random
 class Player(QThread):
     moveImageTrigger = pyqtSignal(MoveImageEvent)
     chocarEnemigoTrigger = pyqtSignal(ChocarEnemigoEvent)
+    gameOverTrigger = pyqtSignal()
 
     def __init__(self, parent, x, y):
         super().__init__()
@@ -41,6 +42,7 @@ class Player(QThread):
         # Conectamos el moveImageTrigger a la funcion de la ventana principal de actualizar imagen
         self.moveImageTrigger.connect(parent.actualizar_imagen)
         self.chocarEnemigoTrigger.connect(parent.comprobar_choque)
+        self.gameOverTrigger.connect(parent.gameOver)
 
         self.collideBox = CollideBox(self, x, y)
         self.__position = (0, 0)
@@ -79,14 +81,15 @@ class Player(QThread):
 
     @salud.setter
     def salud(self, value):
-        if value < 0:
+        if value <= 0:
             self.__salud = 0
             self.die()
         else:
             self.__salud = value
 
     def die(self):
-        # funcion para saber que pasa cuando muere el player
+        time.sleep(0.5)
+        self.gameOverTrigger.emit()
         pass
 
     def update_frame(self):
@@ -117,6 +120,7 @@ class Player(QThread):
         self.position = (self.position[0] - dx, self.position[1] - dy)
 
     def run(self):
+        self.salud = 100
         while True:
             time.sleep(0.04)
             # cambia la posicion de acuerdo a la velocidad
