@@ -92,6 +92,10 @@ class Player(QThread):
         self.gameOverTrigger.emit()
         pass
 
+    def attack(self, pos):
+        # que hacer cuando ataco
+        pass
+
     def update_frame(self):
         # obtengo el numero de la imagen
         number = int(self.imagePath[-1])
